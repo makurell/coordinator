@@ -17,60 +17,39 @@ class Slot:
         get length from start child to end of end child
         """
         self.sort()
-        return (self.timeline[-1].off + self.timeline[-1].length) - self.timeline[0].off
+        if len(self.timeline)>0:
+            return (self.timeline[-1].off + self.timeline[-1].length) - self.timeline[0].off
+        else:
+            return self.length
 
     def sort(self):
         self.timeline.sort(key=lambda x: x.off)
 
-class Coordinator(Slot):
-    def __init__(self):
-        super().__init__("root")
-
-    def visualisation(self,width=30):
+    def visualisation(self,width=None,step=None):
         """
-        :param width: should be slightly less than console width
+        :param width: omit to have 1:1 scaling
         :return:
         """
         self.sort()
+        if step is None:
+            step=self.get_span_length()/width if width is not None else 1
 
         colours=['\033[' + str(x) + 'm' for x in list(range(30,37+1))] # ansi colours
+        ret=[]
 
-        timeline=[] # (index, length)
-        nameline=[] # (index, name)
-        # get scale
-        scale=self.get_span_length()/width
+        buf=""
+        prev_index=0
+        for child in self.timeline:
+            buf+=' '*math.floor((child.off-prev_index)/step)
+            buf+='|'+('x'*(math.floor(child.length/step)-2))+'|'
+            ch_vis=child.visualisation(step=step)
+            if len(ch_vis.strip())>0:
+                ret.append(ch_vis)
+            prev_index=child.off+child.length
+        ret.append(buf)
 
-        # build model
-        for i in range(width):
-            for child in self.timeline:
-                if i*scale <= child.off < i*scale*2:
-                    timeline.append((i,math.floor(child.length*scale)))
-                    nameline.append((i,child.name))
+        return '\n'.join(ret)
 
-        # render
-        ret1=''
-        ret2=''
-        for i in range(width):
-            for item in timeline:
-                if i==item[0]:
-                    ret1+=colours[i%len(colours)]+'|'+colorama.Style.RESET_ALL
-                    break
-            else:
-                ret1+=' '
-
-        iterator=iter(range(width))
-        for i in iterator:
-            for item in nameline:
-                if i==item[0]:
-                    trim=len(item[1])
-                    if i != len(nameline)-1:
-                        trim=nameline[i+1][0]-i # (i=item[0])
-                    ren=(item[1][trim:]+'..') if len(item[1])>trim+2 else item[1]
-                    ret2+=ren
-                    for j in range(len(ren)):
-                        next(iterator) # skip iteration a bit
-                    break
-            else:
-                ret2+=' '
-
-        return ret1+'\n'+ret2
+class Coordinator(Slot):
+    def __init__(self):
+        super().__init__("root")

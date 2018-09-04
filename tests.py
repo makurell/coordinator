@@ -8,4 +8,4 @@ c.timeline.extend([a,
                    Slot("B",71,2),
                    Slot("Ccccccccccccccccccccc",75,3),
                    Slot("D",79,10)])
-print(c.visualisation())
+print(c.visualisation(width=200))
