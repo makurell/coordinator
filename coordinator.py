@@ -28,20 +28,22 @@ class Slot:
     def visualisation(self,width=None,step=None):
         """
         :param width: omit to have 1:1 scaling
-        :return:
+        :param step: will be used if defined
+        :return: string
         """
         self.sort()
         if step is None:
-            step=self.get_span_length()/width if width is not None else 1
+            step=self.get_span_length()/width if (width is not None and width != 0) else 1
 
-        colours=['\033[' + str(x) + 'm' for x in list(range(30,37+1))] # ansi colours
         ret=[]
-
         buf=""
         prev_index=0
         for child in self.timeline:
             buf+=' '*math.floor((child.off-prev_index)/step)
-            buf+='|'+('x'*(math.floor(child.length/step)-2))+'|'
+            maxl=(math.floor(child.length/step)-2)
+            name=child.name[:maxl]+'.. ' if len(child.name)+1>maxl+2 else child.name+' '
+            name = name if (len(name)+max(0,(maxl-len(name))))<child.length*step else ''
+            buf+='|'+name+('x'*(maxl-len(name)))+'|'
             ch_vis=child.visualisation(step=step)
             if len(ch_vis.strip())>0:
                 ret.append(ch_vis)
