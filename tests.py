@@ -19,3 +19,4 @@ for i in range(200):
     print(c.visualisation(width=i))
     print('='*i)
     time.sleep(0.2)
+# print(c.visualisation(width=100))

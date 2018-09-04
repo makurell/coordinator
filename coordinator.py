@@ -76,3 +76,36 @@ class Slot:
 class Coordinator(Slot):
     def __init__(self):
         super().__init__(name="root")
+
+    def visualisation(self,width=None,mult=None,render_scale=True):
+        # get visualisation
+        if mult is None:
+            if width is not None:
+                width = max(1, width)
+                mult=width/self.get_span_length()
+            else:
+                mult=1
+        ret=super(Coordinator,self).visualisation(width=width,mult=mult)
+
+        if not render_scale:
+            return ret
+
+        # get scale's interval
+        key_interval = lambda x: [0.1, 0.5, 1, 5, 10][x] if x < 5 else 30 * 2 ** (x - 5)  # 0.1,0.5,1,5,10,30,60,120...
+        i = 0
+        while True:
+            if key_interval(i)*mult>3: break # 3 = the min amount of space wanted between intervals
+            i+=1
+        interval=key_interval(i)
+
+        # render scale
+        maxl=math.floor(self.get_span_length()*mult)
+        scale=''
+        scale_label=' '*maxl
+        for i in range(maxl):
+            if i % interval==0:
+                scale+='|'
+                scale_label=scale_label[:i]+str(int(i/mult))+scale_label[i:]
+            else:
+                scale+=' '
+        return ret+'\n'+scale[:width]+'\n'+scale_label[:width]
