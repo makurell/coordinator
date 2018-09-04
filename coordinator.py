@@ -18,23 +18,13 @@ class Slot:
             slot.parent=self
             self.timeline.append(slot)
 
-    def get_span_length(self):
-        """
-        get length from start child to end of end child
-        """
-        self.sort()
-        if len(self.timeline)>0:
-            return (self.timeline[-1].off + self.timeline[-1].length) - self.timeline[0].off
-        else:
-            return self.length
-
     def abs_off(self):
         par = self.parent
-        curoff = self.off
+        ret = self.off
         while par is not None:
-            curoff+=par.off
+            ret+=par.off
             par=par.parent
-        return curoff
+        return ret
 
     def sort(self):
         self.timeline.sort(key=lambda x: x.off)
@@ -43,7 +33,6 @@ class Slot:
         self.sort()
 
         ret=[]
-
         buf=""
         prev_index=0
         for child in self.timeline:
