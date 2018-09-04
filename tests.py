@@ -15,4 +15,7 @@ c.add(a,
       Slot("Ccccccccccc", 75, 3),
       Slot("D", 79, 10))
 
-print(c.visualisation())
+for i in range(200):
+    print(c.visualisation(width=i))
+    print('='*i)
+    time.sleep(0.2)
