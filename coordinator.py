@@ -4,7 +4,7 @@ import colorama
 
 class Slot:
 
-    def __init__(self,name="",off=0.0,length=0.0):
+    def __init__(self, name="", length=0.0, off=0.0):
         colorama.init()
 
         self.parent:Slot=None
@@ -12,6 +12,9 @@ class Slot:
         self.name = name
         self.off = off # (relative) start time in seconds
         self.length = length # length in seconds
+
+    def make_slot(self):
+        pass
 
     def add(self, *slots):
         """

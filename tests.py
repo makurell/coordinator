@@ -3,21 +3,16 @@ import time
 
 from coordinator import Coordinator, Slot
 
-c=Coordinator()
-a=Slot("A", 0, 70)
-aa=Slot("AA", 2, 50)
-aa.add(Slot("AAa", 8, 10),
-       Slot("AAb", 20, 6))
+c= Coordinator()
+a= Slot("A", 70, 0)
+aa= Slot("AA", 50, 2)
+aa.add(Slot("AAa", 10, 8),
+       Slot("AAb", 6, 20))
 a.add(aa,
-      Slot("Ab", 56, 10))
+      Slot("Ab", 10, 56))
 c.add(a,
-      Slot("B", 71, 2),
-      Slot("Ccccccccccc", 75, 3),
-      Slot("D", 79, 10))
+      Slot("B", 4, 71),
+      Slot("Ccccccccccc", 3, 75),
+      Slot("D", 10, 79))
 
-# for i in range(200):
-#     print(c.visualisation(width=i))
-#     print('='*i)
-#     time.sleep(0.2)
 print(c.visualisation(width=100))
-# print('='*100)
