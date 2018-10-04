@@ -1,10 +1,11 @@
 import math
+import random
 from typing import List, Any
 import colorama
 
 class Slot:
 
-    def __init__(self, name="", length=0.0, off=0.0):
+    def __init__(self, name="", off=0.0, length=0.0):
         colorama.init()
 
         self.parent:Slot=None
@@ -13,8 +14,15 @@ class Slot:
         self.off = off # (relative) start time in seconds
         self.length = length # length in seconds
 
-    def make_slot(self):
-        pass
+    def end_off(self):
+        """
+        the time of the end of the currently last slot (relative to parent slot)
+        """
+        # last slot
+        self.sort()
+        if len(self.timeline)>0:
+            return self.timeline[-1].off + self.timeline[-1].length
+        else: return 0
 
     def add(self, *slots):
         """
@@ -23,6 +31,40 @@ class Slot:
         for slot in slots:
             slot.parent=self
             self.timeline.append(slot)
+
+    def disperse(self, length, *slots, end_time=None, confine=False):
+        """
+        add and randomly disperse slots of given length into remaining available time
+        :raises ValueError:
+        """
+        if len(slots)<=0: return
+        if end_time is None: end_time=self.length
+
+        maxl = (end_time-self.end_off())/len(slots)
+        if maxl<=0 or maxl < length: raise ValueError
+
+        if confine:
+            i=0
+            for slot in slots:
+                slot.off=random.uniform(maxl*i,maxl*(i+1) - length)
+                slot.length=length
+
+                self.add(slot)
+                i+=1
+        else:
+            i=0
+            curoff=self.end_off()
+            for slot in slots:
+                nrem=((len(slots)-i-1)*length)
+                slot.off=random.uniform(curoff,self.length-nrem-length)
+                print((curoff,self.length-nrem-length))
+                slot.length=length
+
+                self.add(slot)
+                curoff=slot.off+length
+                i+=1
+
+
 
     def abs_off(self):
         par = self.parent
@@ -39,9 +81,8 @@ class Slot:
         """
         get length from first child's start to last child's end (or given length if no children)
         """
-        self.sort()
         if len(self.timeline)>0:
-            return (self.timeline[-1].off+self.timeline[-1].length)-self.timeline[0].off
+            return self.end_off() - self.timeline[0].off
         else:
             return self.length
 
@@ -50,15 +91,15 @@ class Slot:
                       c_fill=' ',
                       c_start='[',
                       c_end=']',
-                      c_scale_fill='-',
-                      c_interval_marker='+',
+                      c_scale_fill=' ',
+                      c_interval_marker='|',
                       c_pad=''):
         self.sort()
 
         if mult is None:
             if width is not None:
                 width = max(1, width)
-                mult=width/self.get_span_length()
+                mult=width/self.get_span_length() # will throw divby0 if no items
             else:
                 mult=1
 
