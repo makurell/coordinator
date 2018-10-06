@@ -1,18 +1,21 @@
 import math
 import random
 from typing import List, Any
-import colorama
+import time
 
 class Slot:
 
-    def __init__(self, name="", off=0.0, length=0.0):
-        colorama.init()
+    def __init__(self, name="", off=0.0, length=0.0, action=None, args=None):
+        if args is None:
+            args = []
 
         self.parent:Slot=None
         self.timeline:List[Slot]=[]
         self.name = name
         self.off = off # (relative) start time in seconds
         self.length = length # length in seconds
+        self.action = action
+        self.args = args
 
     def end_off(self):
         """
@@ -57,14 +60,11 @@ class Slot:
             for slot in slots:
                 nrem=((len(slots)-i-1)*length)
                 slot.off=random.uniform(curoff,self.length-nrem-length)
-                print((curoff,self.length-nrem-length))
                 slot.length=length
 
                 self.add(slot)
                 curoff=slot.off+length
                 i+=1
-
-
 
     def abs_off(self):
         par = self.parent
@@ -85,6 +85,24 @@ class Slot:
             return self.end_off() - self.timeline[0].off
         else:
             return self.length
+
+    def run(self,precision=1):
+        """
+        run this slot - execute the appropriate actions at the appropriate times.
+        :param precision: precision in seconds
+        """
+        starttime=time.time()
+        if self.action is not None:
+            self.action(*self.args)
+        else:
+            self.sort()
+
+            queue = self.timeline
+            while len(queue)>0:
+                if queue[0].off<=(time.time()-starttime):
+                    queue[0].run(precision=precision)
+                    queue.pop(0)
+                time.sleep(precision-(time.time()-starttime) % precision)
 
     def visualisation(self, width=None, mult=None, render_scale=True,
                       c_body='-',

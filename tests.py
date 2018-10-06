@@ -1,7 +1,11 @@
 import os
 import time
+from datetime import datetime
 
 from coordinator import Coordinator, Slot
+
+def test_action(name):
+    print('['+str(datetime.now())+'] '+name)
 
 # c= Coordinator()
 # a= Slot("A", 0, 70)
@@ -18,12 +22,24 @@ from coordinator import Coordinator, Slot
 # print(c.visualisation(width=100))
 
 c= Coordinator()
-a= Slot('scrolling', 0, 100)
+a= Slot('aprinting', 0, 20)
+b= Slot('bprinting', 40, 30)
 # a.add(Slot('b',8,10),
 #       Slot('c',20,5))
 
-a.disperse(10,Slot('a'),Slot('b'))
+for i in range(3):
+    a.add(Slot(off=6*i,length=1,action=test_action,args=['a']))
+
+b.disperse(2,Slot(action=test_action,args='b'),
+           Slot(action=test_action,args='b'),
+           Slot(action=test_action,args='b'),
+           Slot(action=test_action,args='b'),
+           Slot(action=test_action,args='b'),
+           Slot(action=test_action,args='b'))
 
 c.add(a)
+c.add(b)
 
 print(c.visualisation(width=100))
+
+c.run()
