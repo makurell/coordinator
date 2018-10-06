@@ -86,10 +86,11 @@ class Slot:
         else:
             return self.length
 
-    def run(self,precision=1):
+    def run(self,precision=1,continuous=False):
         """
         run this slot - execute the appropriate actions at the appropriate times.
         :param precision: precision in seconds
+        :param continuous: should run forever
         """
         starttime=time.time()
         if self.action is not None:
@@ -97,11 +98,11 @@ class Slot:
         else:
             self.sort()
 
-            queue = self.timeline
-            while len(queue)>0:
-                if queue[0].off<=(time.time()-starttime):
-                    queue[0].run(precision=precision)
-                    queue.pop(0)
+            index=0
+            while index<len(self.timeline) or continuous:
+                if self.timeline[index].off<=(time.time()-starttime):
+                    self.timeline[index].run(precision=precision)
+                    index+=1
                 time.sleep(precision-(time.time()-starttime) % precision)
 
     def visualisation(self, width=None, mult=None, render_scale=True,
